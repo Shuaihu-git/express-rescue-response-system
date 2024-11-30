@@ -8,9 +8,19 @@ export function list(query) {
     })
   }
 // 查询参数详细
-export function getConfig(configId) {
+export function getScanLog(id) {
   return request({
-    url: '/system/config/' + configId,
+    url: '/qrlog/' + id,
     method: 'get'
+  })
+}
+
+//updateScanLog
+// 处理日志状态
+export function updateScanLog(data) {
+  return request({
+    url: '/qrlog/update',
+    method: 'put',
+    data: data
   })
 }

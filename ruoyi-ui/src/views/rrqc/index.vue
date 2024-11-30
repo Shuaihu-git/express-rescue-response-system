@@ -70,7 +70,7 @@
         </el-table-column>
         <el-table-column label="经度" align="center" prop="longitude" :show-overflow-tooltip="true" />
         <el-table-column label="维度" align="center" prop="latitude" :show-overflow-tooltip="true" />
-        
+        <el-table-column label="处理人" align="center" prop="dealer" :show-overflow-tooltip="true" />
         <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -96,15 +96,6 @@
       <!-- 添加或修改参数配置对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <!-- <el-form-item label="参数名称" prop="configName">
-          <el-input v-model="form.configName" placeholder="请输入参数名称" />
-        </el-form-item>
-        <el-form-item label="参数键名" prop="configKey">
-          <el-input v-model="form.configKey" placeholder="请输入参数键名" />
-        </el-form-item>
-        <el-form-item label="参数键值" prop="configValue">
-          <el-input v-model="form.configValue" type="textarea" placeholder="请输入参数键值" />
-        </el-form-item> -->
         <el-form-item label="处理状态" prop="type">
           <el-radio-group v-model="form.type">
             <el-radio
@@ -127,7 +118,7 @@
   </template>
   
   <script>
-  import { list } from "@/api/rrqc/scanlog";
+  import { list, getScanLog,updateScanLog } from "@/api/rrqc/scanlog";
   
   export default {
     name: "ScanLog",
@@ -249,32 +240,46 @@
           ...this.queryParams
         }, `扫码记录_${new Date().getTime()}.xlsx`)
       },
+      // 表单重置
+    reset() {
+      this.form = {
+        logId: undefined,
+        type: "0",
+        remark: undefined
+      };
+      this.resetForm("form");
+    },
       /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const configId = row.configId || this.ids
-      getConfig(configId).then(response => {
+      console.log("修改扫码记录",row);
+      const logId = row.logId || this.ids
+      getScanLog(logId).then(response => {
         this.form = response.data;
+        console.log('查询赋值',this.form);
         this.open = true;
-        this.title = "修改参数";
+        this.title = "处理扫码救援";
       });
     },
     /** 提交按钮 */
     submitForm: function() {
       this.$refs["form"].validate(valid => {
+        console.log(this.form);
         if (valid) {
-          if (this.form.configId != undefined) {
-            updateConfig(this.form).then(response => {
+          if (this.form.logId != undefined) {
+            console.log(this.form);
+            updateScanLog(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addConfig(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
+            console.log("新增处理扫码救援");
+            // addConfig(this.form).then(response => {
+            //   this.$modal.msgSuccess("新增成功");
+            //   this.open = false;
+            //   this.getList();
+            // });
           }
         }
       });
