@@ -1,7 +1,7 @@
 <template>
     <div class="app-container">
       <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <el-form-item label="登录地址" prop="ipaddr">
+        <!-- <el-form-item label="登录地址" prop="ipaddr">
           <el-input
             v-model="queryParams.ipaddr"
             placeholder="请输入登录地址"
@@ -9,32 +9,32 @@
             style="width: 240px;"
             @keyup.enter.native="handleQuery"
           />
-        </el-form-item>
-        <el-form-item label="用户名称" prop="userName">
+        </el-form-item> -->
+        <el-form-item label="处理人" prop="dealer">
           <el-input
-            v-model="queryParams.userName"
+            v-model="queryParams.dealer"
             placeholder="请输入用户名称"
             clearable
             style="width: 240px;"
             @keyup.enter.native="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item label="处理状态" prop="type">
           <el-select
-            v-model="queryParams.status"
-            placeholder="登录状态"
+            v-model="queryParams.type"
+            placeholder="处理状态"
             clearable
             style="width: 240px"
           >
             <el-option
-              v-for="dict in dict.type.sys_common_status"
+              v-for="dict in dict.type.scan_type"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="登录时间">
+        <el-form-item label="扫码时间">
           <el-date-picker
             v-model="dateRange"
             style="width: 240px"
@@ -118,6 +118,18 @@
           </template>
         </el-table-column> -->
         <el-table-column label="扫码时间" align="center" prop="time" :show-overflow-tooltip="true" />
+        <el-table-column label="二维码内容" align="center" prop="content" :show-overflow-tooltip="true" />
+        <el-table-column label="桩号" align="center" prop="zhuangNum" :show-overflow-tooltip="true" />
+        <el-table-column label="天气" align="center" prop="weather" :show-overflow-tooltip="true" />
+        <el-table-column label="处理状态" align="center" prop="type" :show-overflow-tooltip="true" >
+          <template slot-scope="scope">
+            <dict-tag :options="dict.type.scan_type" :value="scope.row.type"/>
+          </template>  
+        </el-table-column>
+        <el-table-column label="经度" align="center" prop="longitude" :show-overflow-tooltip="true" />
+        <el-table-column label="维度" align="center" prop="latitude" :show-overflow-tooltip="true" />
+        
+        <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
       </el-table>
   
       <pagination
@@ -135,7 +147,7 @@
   
   export default {
     name: "ScanLog",
-    dicts: ['sys_common_status'],
+    dicts: ['scan_type'],
     data() {
       return {
         // 遮罩层
@@ -157,7 +169,7 @@
         // 日期范围
         dateRange: [],
         // 默认排序
-        // defaultSort: {prop: 'loginTime', order: 'descending'},
+        defaultSort: {prop: 'time', order: 'descending'},
         // 查询参数
         queryParams: {
           pageNum: 1,

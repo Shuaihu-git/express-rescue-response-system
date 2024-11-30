@@ -1,12 +1,20 @@
 package com.ruoyi.web.controller.websocket;
 
 
+import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.system.domain.dto.ScanLog;
 import com.ruoyi.system.domain.dto.SnowAccessLog;
 import com.ruoyi.system.domain.dto.WebSocketClient;
+import com.ruoyi.system.service.IScanLogService;
 import com.ruoyi.system.service.ISnowAccessService;
+import com.ruoyi.web.controller.rrqc.dto.RRQCMessage;
 import com.ruoyi.web.controller.rrqc.dto.ServerEncoder;
 import com.ruoyi.web.controller.rrqc.vo.LogVo;
+import com.ruoyi.web.controller.rrqc.vo.Weather;
+import com.ruoyi.web.controller.rrqc.weather.QueryWeather;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -17,8 +25,13 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import java.beans.Beans;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -35,7 +48,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class WebSocketService {
     @Autowired
-    private ISnowAccessService snowAccessService= SpringUtils.getBean("snowAccessService");
+    private IScanLogService scanLogService= SpringUtils.getBean("scanLogService");
+
+    @Autowired
+    private QueryWeather queryWeather=SpringUtils.getBean("queryWeather");
 
     private static ApplicationContext applicationContext;
 
@@ -103,16 +119,33 @@ public class WebSocketService {
      * @throws IOException 异常
      */
     @OnMessage
-    public void onMsg(Session session, String message) throws IOException {
+    public void onMsg(Session session, String message) throws IOException, ParseException {
         log.info("消息到达{}",message);
-        if (!message.isEmpty()){
+        RRQCMessage rrqcMessage = JSONObject.parseObject(message, RRQCMessage.class);
+
+        if (!message.isEmpty()&&!ObjectUtils.isNull(rrqcMessage)){
+            ScanLog scanLog = new ScanLog();
+            scanLog.setAddress(rrqcMessage.getAddress());
+            scanLog.setContent(rrqcMessage.getContent());
+            scanLog.setTime(rrqcMessage.getTime());
+            scanLog.setZhuangNum(rrqcMessage.getZhuangNum());
+            scanLog.setType(rrqcMessage.getType());
+            Weather weather = queryWeather.getWeather();
+            if (!ObjectUtils.isNull(weather)){
+                if (!ObjectUtils.isNull(weather.getNow())){
+                    scanLog.setWeather(weather.getNow().getText());
+                }
+
+            }
+
+
+            if (!ObjectUtils.isNull(rrqcMessage.getLocation())){
+                scanLog.setLongitude(rrqcMessage.getLocation().getLongitude());
+                scanLog.setLatitude(rrqcMessage.getLocation().getLatitude());
+            }
+            scanLog.setRemark(rrqcMessage.getRemark());
+            scanLogService.insert(scanLog);
             if (webSocketMap.containsKey("admin")){
-                SnowAccessLog snowAccessLog = new SnowAccessLog();
-                snowAccessLog.setData(message);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                snowAccessLog.setTime(simpleDateFormat.format(new Date()));
-                snowAccessLog.setTag("测试");
-                snowAccessService.insert(snowAccessLog);
                 sendMessage("admin",message);
             }else {
                 messagesSendToAdmin.add(new LogVo(message));
