@@ -14,10 +14,7 @@ import com.ruoyi.system.service.IScanLogService;
 import com.ruoyi.system.service.ISnowAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.text.SimpleDateFormat;
@@ -33,12 +30,14 @@ public class ScanLogController extends BaseController {
 
     @GetMapping("/qrlog/list")
     @PreAuthorize("@ss.hasPermi('rrqc:scanlog:list')")
+    @Log(title = "扫码日志列表")
     public TableDataInfo list(ScanLog scanLog) {
         startPage();
         return getDataTable(scanLogService.list(scanLog));
     }
-    @PostMapping("/qrlog/update")
+    @PutMapping("/qrlog/update")
     @PreAuthorize("@ss.hasPermi('rrqc:scanlog:edit')")
+    @Log(title = "扫码日志编辑")
     public AjaxResult update(@RequestBody ScanLog scanLog) {
         if (Objects.isNull(scanLog)){
             return error("错误参数");
@@ -46,7 +45,7 @@ public class ScanLogController extends BaseController {
         scanLog.setDealer(getUsername());
         return toAjax(scanLogService.update(scanLog));
     }
-    @Log(title = "扫码日志", businessType = BusinessType.EXPORT)
+    @Log(title = "扫码日志Excel导出", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('rrqc:scanlog:export')")
     @PostMapping("/qrlog/export")
     public void export(HttpServletResponse response, ScanLog scanLog)
@@ -54,5 +53,14 @@ public class ScanLogController extends BaseController {
         List<ScanLog> list = scanLogService.list(scanLog);
         ExcelUtil<ScanLog> util = new ExcelUtil<ScanLog>(ScanLog.class);
         util.exportExcel(response, list, "扫码记录");
+    }
+    /**
+     * 查询字典类型详细
+     */
+    @PreAuthorize("@ss.hasPermi('rrqc:scanlog:query')")
+    @GetMapping(value = "/qrlog/{id}")
+    public AjaxResult getInfo(@PathVariable Long id)
+    {
+        return success(scanLogService.selectScanLogById(id));
     }
 }

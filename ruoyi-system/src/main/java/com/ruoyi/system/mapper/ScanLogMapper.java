@@ -14,5 +14,5 @@ public interface ScanLogMapper extends BaseMapper<ScanLog> {
     int update(ScanLog scanLog);
 
 
-
+    ScanLog selectScanLogById(Long id);
 }

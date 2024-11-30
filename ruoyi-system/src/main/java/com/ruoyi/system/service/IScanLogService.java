@@ -9,4 +9,6 @@ public interface IScanLogService {
     List<ScanLog> list(ScanLog scanLog);
     int insert(ScanLog scanLog);
     int update(ScanLog scanLog);
+
+    ScanLog selectScanLogById(Long id);
 }

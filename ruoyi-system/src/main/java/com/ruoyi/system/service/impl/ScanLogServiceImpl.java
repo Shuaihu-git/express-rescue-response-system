@@ -33,4 +33,9 @@ public class ScanLogServiceImpl implements IScanLogService {
     public int update(ScanLog scanLog) {
         return scanLogMapper.update(scanLog);
     }
+
+    @Override
+    public ScanLog selectScanLogById(Long id) {
+        return scanLogMapper.selectScanLogById(id);
+    }
 }

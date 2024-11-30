@@ -43,7 +43,7 @@
         update scanlog
         <set>
             <if test="content != null and content != ''">content = #{content},</if>
-            <if test="time != null and time != ''">time = #{time},</if>
+            time = #{time},
             <if test="type != null and type != ''">type = #{type},</if>
             <if test="address != null and address != ''">address = #{address},</if>
             <if test="longitude != null and longitude != ''">longitude = #{longitude},</if>
@@ -74,6 +74,10 @@
         </where>
         order by id desc
 
+    </select>
+    <select id="selectScanLogById" parameterType="long" resultType="com.ruoyi.system.domain.dto.ScanLog">
+        select s.id as logId, s.content,s.zhuangNum, s.time, s.type,s.address,s.longitude,s.latitude,s.weather,s.remark,s.dealer
+        from scanlog s where s.id= #{id}
     </select>
 
 
