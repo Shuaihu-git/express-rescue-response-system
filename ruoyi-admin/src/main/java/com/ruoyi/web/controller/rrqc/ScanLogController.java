@@ -7,18 +7,13 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.domain.SysLogininfor;
 import com.ruoyi.system.domain.dto.ScanLog;
-import com.ruoyi.system.domain.dto.SnowAccessLog;
 import com.ruoyi.system.service.IScanLogService;
-import com.ruoyi.system.service.ISnowAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
