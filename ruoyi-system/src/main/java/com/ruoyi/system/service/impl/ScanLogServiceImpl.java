@@ -20,8 +20,8 @@ public class ScanLogServiceImpl implements IScanLogService {
     private ScanLogMapper scanLogMapper;
 
     @Override
-    public List<ScanLog> list() {
-        return scanLogMapper.list();
+    public List<ScanLog> list(ScanLog scanLog) {
+        return scanLogMapper.list(scanLog);
     }
 
     @Override

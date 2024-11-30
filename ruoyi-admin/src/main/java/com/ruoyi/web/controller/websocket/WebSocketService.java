@@ -3,13 +3,10 @@ package com.ruoyi.web.controller.websocket;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.dto.ScanLog;
-import com.ruoyi.system.domain.dto.SnowAccessLog;
 import com.ruoyi.system.domain.dto.WebSocketClient;
 import com.ruoyi.system.service.IScanLogService;
-import com.ruoyi.system.service.ISnowAccessService;
 import com.ruoyi.web.controller.rrqc.dto.RRQCMessage;
 import com.ruoyi.web.controller.rrqc.dto.ServerEncoder;
 import com.ruoyi.web.controller.rrqc.vo.LogVo;
@@ -21,20 +18,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.beans.Beans;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -135,10 +125,7 @@ public class WebSocketService {
                 if (!ObjectUtils.isNull(weather.getNow())){
                     scanLog.setWeather(weather.getNow().getText());
                 }
-
             }
-
-
             if (!ObjectUtils.isNull(rrqcMessage.getLocation())){
                 scanLog.setLongitude(rrqcMessage.getLocation().getLongitude());
                 scanLog.setLatitude(rrqcMessage.getLocation().getLatitude());

@@ -1,15 +1,6 @@
 <template>
     <div class="app-container">
       <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-        <!-- <el-form-item label="登录地址" prop="ipaddr">
-          <el-input
-            v-model="queryParams.ipaddr"
-            placeholder="请输入登录地址"
-            clearable
-            style="width: 240px;"
-            @keyup.enter.native="handleQuery"
-          />
-        </el-form-item> -->
         <el-form-item label="处理人" prop="dealer">
           <el-input
             v-model="queryParams.dealer"
@@ -55,44 +46,12 @@
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
           <el-button
-            type="danger"
-            plain
-            icon="el-icon-delete"
-            size="mini"
-            :disabled="multiple"
-            @click="handleDelete"
-            v-hasPermi="['monitor:logininfor:remove']"
-          >删除</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="danger"
-            plain
-            icon="el-icon-delete"
-            size="mini"
-            @click="handleClean"
-            v-hasPermi="['monitor:logininfor:remove']"
-          >清空</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="primary"
-            plain
-            icon="el-icon-unlock"
-            size="mini"
-            :disabled="single"
-            @click="handleUnlock"
-            v-hasPermi="['monitor:logininfor:unlock']"
-          >解锁</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
             type="warning"
             plain
             icon="el-icon-download"
             size="mini"
             @click="handleExport"
-            v-hasPermi="['monitor:logininfor:export']"
+            v-hasPermi="['rrqc:scanlog:export']"
           >导出</el-button>
         </el-col>
         <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -100,23 +59,6 @@
   
       <el-table ref="tables" v-loading="loading" :data="list" @selection-change="handleSelectionChange" :default-sort="defaultSort" @sort-change="handleSortChange">
         <el-table-column type="selection" width="55" align="center" />
-        <!-- <el-table-column label="访问编号" align="center" prop="infoId" />
-        <el-table-column label="用户名称" align="center" prop="userName" :show-overflow-tooltip="true" sortable="custom" :sort-orders="['descending', 'ascending']" />
-        <el-table-column label="登录地址" align="center" prop="ipaddr" width="130" :show-overflow-tooltip="true" />
-        <el-table-column label="登录地点" align="center" prop="loginLocation" :show-overflow-tooltip="true" />
-        <el-table-column label="浏览器" align="center" prop="browser" :show-overflow-tooltip="true" />
-        <el-table-column label="操作系统" align="center" prop="os" />
-        <el-table-column label="登录状态" align="center" prop="status">
-          <template slot-scope="scope">
-            <dict-tag :options="dict.type.sys_common_status" :value="scope.row.status"/>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作信息" align="center" prop="msg" :show-overflow-tooltip="true" />
-        <el-table-column label="登录日期" align="center" prop="loginTime" sortable="custom" :sort-orders="['descending', 'ascending']" width="180"> -->
-          <!-- <template slot-scope="scope">
-            <span>{{ parseTime(scope.row.loginTime) }}</span>
-          </template>
-        </el-table-column> -->
         <el-table-column label="扫码时间" align="center" prop="time" :show-overflow-tooltip="true" />
         <el-table-column label="二维码内容" align="center" prop="content" :show-overflow-tooltip="true" />
         <el-table-column label="桩号" align="center" prop="zhuangNum" :show-overflow-tooltip="true" />
@@ -130,7 +72,19 @@
         <el-table-column label="维度" align="center" prop="latitude" :show-overflow-tooltip="true" />
         
         <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['rrqc:scanlog:edit']"
+          >修改</el-button>
+        </template>
+      </el-table-column>
       </el-table>
+    
   
       <pagination
         v-show="total>0"
@@ -139,6 +93,36 @@
         :limit.sync="queryParams.pageSize"
         @pagination="getList"
       />
+      <!-- 添加或修改参数配置对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <!-- <el-form-item label="参数名称" prop="configName">
+          <el-input v-model="form.configName" placeholder="请输入参数名称" />
+        </el-form-item>
+        <el-form-item label="参数键名" prop="configKey">
+          <el-input v-model="form.configKey" placeholder="请输入参数键名" />
+        </el-form-item>
+        <el-form-item label="参数键值" prop="configValue">
+          <el-input v-model="form.configValue" type="textarea" placeholder="请输入参数键值" />
+        </el-form-item> -->
+        <el-form-item label="处理状态" prop="type">
+          <el-radio-group v-model="form.type">
+            <el-radio
+              v-for="dict in dict.type.scan_type"
+              :key="dict.value"
+              :label="dict.value"
+            >{{dict.label}}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
     </div>
   </template>
   
@@ -164,20 +148,29 @@
         showSearch: true,
         // 总条数
         total: 0,
+        open: false,
         // 表格数据
         list: [],
         // 日期范围
         dateRange: [],
+        form: {},
         // 默认排序
         defaultSort: {prop: 'time', order: 'descending'},
         // 查询参数
         queryParams: {
           pageNum: 1,
           pageSize: 10,
-          ipaddr: undefined,
-          userName: undefined,
-          status: undefined
-        }
+          time: undefined,
+          dealer: undefined,
+          type: undefined
+        },
+         // 表单校验
+      rules: {
+        remark: [
+          { required: true, message: "备注不能为空", trigger: "blur" }
+        ]
+        
+      }
       };
     },
     created() {
@@ -210,10 +203,10 @@
       },
       /** 多选框选中数据 */
       handleSelectionChange(selection) {
-        this.ids = selection.map(item => item.infoId)
+        this.ids = selection.map(item => item.logId)
         this.single = selection.length!=1
         this.multiple = !selection.length
-        this.selectName = selection.map(item => item.userName);
+        this.selectName = selection.map(item => item.logId);
       },
       /** 排序触发事件 */
       handleSortChange(column, prop, order) {
@@ -249,12 +242,48 @@
           this.$modal.msgSuccess("用户" + username + "解锁成功");
         }).catch(() => {});
       },
+      
       /** 导出按钮操作 */
       handleExport() {
-        this.download('monitor/logininfor/export', {
+        this.download('/qrlog/export', {
           ...this.queryParams
-        }, `logininfor_${new Date().getTime()}.xlsx`)
-      }
+        }, `扫码记录_${new Date().getTime()}.xlsx`)
+      },
+      /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.reset();
+      const configId = row.configId || this.ids
+      getConfig(configId).then(response => {
+        this.form = response.data;
+        this.open = true;
+        this.title = "修改参数";
+      });
+    },
+    /** 提交按钮 */
+    submitForm: function() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          if (this.form.configId != undefined) {
+            updateConfig(this.form).then(response => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
+          } else {
+            addConfig(this.form).then(response => {
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
+          }
+        }
+      });
+    },
+    // 取消按钮
+    cancel() {
+      this.open = false;
+      this.reset();
+    },
     }
   };
   </script>

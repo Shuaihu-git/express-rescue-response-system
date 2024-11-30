@@ -7,7 +7,7 @@ import com.ruoyi.system.domain.dto.ScanLog;
 import java.util.List;
 
 public interface ScanLogMapper extends BaseMapper<ScanLog> {
-    List<ScanLog> list();
+    List<ScanLog> list(ScanLog scanLog);
 
     int insert(ScanLog scanLog);
 

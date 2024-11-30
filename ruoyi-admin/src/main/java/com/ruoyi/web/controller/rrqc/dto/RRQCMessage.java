@@ -15,7 +15,7 @@ import java.util.List;
 public class RRQCMessage {
     private String content;
     private String zhuangNum;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date time;
     private String type;

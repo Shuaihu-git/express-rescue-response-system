@@ -7,3 +7,10 @@ export function list(query) {
       params: query
     })
   }
+// 查询参数详细
+export function getConfig(configId) {
+  return request({
+    url: '/system/config/' + configId,
+    method: 'get'
+  })
+}

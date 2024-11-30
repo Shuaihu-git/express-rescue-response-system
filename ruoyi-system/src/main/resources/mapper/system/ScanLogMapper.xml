@@ -56,8 +56,23 @@
         </set>
         where id = #{logId}
     </update>
-    <select id="list" resultMap="BaseResultMap">
+    <select id="list" parameterType="ScanLog" resultMap="BaseResultMap">
      <include refid="selectScanLogVo"></include>
+        <where>
+            <if test="dealer != null and dealer != ''">
+                AND dealer like concat('%', #{dealer}, '%')
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND time &lt;= #{params.endTime}
+            </if>
+        </where>
+        order by id desc
 
     </select>
 
