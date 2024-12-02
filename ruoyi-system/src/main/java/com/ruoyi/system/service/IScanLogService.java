@@ -11,4 +11,6 @@ public interface IScanLogService {
     int update(ScanLog scanLog);
 
     ScanLog selectScanLogById(Long id);
+    int getCountOnTheMonth();
+    int getCountOnTheMonthByType(String type);
 }

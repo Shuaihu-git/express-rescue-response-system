@@ -38,4 +38,14 @@ public class ScanLogServiceImpl implements IScanLogService {
     public ScanLog selectScanLogById(Long id) {
         return scanLogMapper.selectScanLogById(id);
     }
+
+    @Override
+    public int getCountOnTheMonth() {
+        return scanLogMapper.getCountOnTheMonth();
+    }
+
+    @Override
+    public int getCountOnTheMonthByType(String type) {
+        return scanLogMapper.getCountOnTheMonthByType(type);
+    }
 }

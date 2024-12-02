@@ -79,6 +79,16 @@
         select s.id as logId, s.content,s.zhuangNum, s.time, s.type,s.address,s.longitude,s.latitude,s.weather,s.remark,s.dealer
         from scanlog s where s.id= #{id}
     </select>
+    <select id="getCountOnTheMonth" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS total_count
+        FROM scanlog
+        WHERE DATE_FORMAT(time, '%Y-%m') = DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m');
+    </select>
+    <select id="getCountOnTheMonthByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS total_count
+        FROM scanlog
+        WHERE DATE_FORMAT(time, '%Y-%m') = DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m') and type=#{type};
+    </select>
 
 
 </mapper>

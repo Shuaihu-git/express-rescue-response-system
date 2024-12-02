@@ -59,4 +59,36 @@ public class ScanLogController extends BaseController {
     {
         return success(scanLogService.selectScanLogById(id));
     }
+    @Log(title = "获取当月发生事件总数")
+    @GetMapping("/qrlog/count")
+    public AjaxResult getScanLogsOnThisMonth()
+    {
+        return success(scanLogService.getCountOnTheMonth());
+    }
+    @Log(title = "获取当月事件处理率")
+    @GetMapping("/qrlog/dealRate")
+    public AjaxResult dealRate()
+    {
+        int countOnTheMonth = scanLogService.getCountOnTheMonth();
+        Double dealRate =null;
+        String result = null;
+        if (countOnTheMonth!=0){
+            int byType = scanLogService.getCountOnTheMonthByType("1");
+            System.out.println((double) byType/(double)countOnTheMonth);
+            dealRate=(double) byType/(double)countOnTheMonth;
+            result = String.format("%.1f", dealRate*100);
+        }
+        return success(result);
+    }
+    @Log(title = "获取当月事件通过处理类型")
+    @GetMapping("/qrlog/count/{type}")
+    public AjaxResult getCountByType(@PathVariable("type") String type)
+    {
+        if (type == null || type.isEmpty()){
+            return error("请填写参数");
+        }
+        return success(scanLogService.getCountOnTheMonthByType(type));
+    }
+
+
 }
