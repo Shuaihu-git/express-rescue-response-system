@@ -178,11 +178,10 @@ public class WebSocketService {
     }
     @Scheduled(fixedRate = 1000 * 10)
     public void pushAdminWebSocket() {
-        log.info("处理消息滞留重发问题");
-        log.info("条件一{}", !(webSocketMap.get("admin") == null));
-        log.info("条件二{}",!messagesSendToAdmin.isEmpty());
+        log.info("管理端是否在线{}", !(webSocketMap.get("admin") == null));
+        log.info("是否有消息滞留{}",!messagesSendToAdmin.isEmpty());
         if (!(webSocketMap.get("admin") == null)&&!messagesSendToAdmin.isEmpty()) {
-            log.info("Admin消息重发{}",!(webSocketMap.get("admin") == null)&&!messagesSendToAdmin.isEmpty());
+            log.info("执行滞留消息重发{}",!(webSocketMap.get("admin") == null)&&!messagesSendToAdmin.isEmpty());
            messagesSendToAdmin.forEach(e -> sendMessage("admin", e.getData()));
            messagesSendToAdmin.clear();
         }else {

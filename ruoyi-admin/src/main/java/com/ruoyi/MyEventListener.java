@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Component
 public class MyEventListener implements ApplicationListener<ApplicationReadyEvent> {
@@ -20,9 +21,13 @@ public class MyEventListener implements ApplicationListener<ApplicationReadyEven
     private String number2;
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.setNumber1(number1);
-        phoneNumber.setNumber2(number2);
-        redisCache.setCacheObject(CacheConstants.PHONE_NAME_KEY, phoneNumber);
+        PhoneNumber cache = redisCache.getCacheObject(CacheConstants.PHONE_NAME_KEY);
+        if (Objects.isNull(cache)){
+            PhoneNumber phoneNumber = new PhoneNumber();
+            phoneNumber.setNumber1(number1);
+            phoneNumber.setNumber2(number2);
+            redisCache.setCacheObject(CacheConstants.PHONE_NAME_KEY, phoneNumber);
+        }
+
     }
 }

@@ -54,6 +54,7 @@ public class ScanLogController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('rrqc:scanlog:query')")
     @GetMapping(value = "/qrlog/{id}")
+    @Log(title = "扫码日志查询")
     public AjaxResult getInfo(@PathVariable Long id)
     {
         return success(scanLogService.selectScanLogById(id));
