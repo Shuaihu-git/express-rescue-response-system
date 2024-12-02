@@ -6,8 +6,8 @@
     <div class="top-stats">
       <div class="stat-item">本月发生事件数量（件）
         <div class="content-bar">
-          </br><span class="content">100</span>
-          <span class="content-right">同比上月 <span style="color: red;">&#x25B2;</span> {{ contentRight }}%</span>
+          </br><span class="content">{{count}}</span>
+          <!-- <span class="content-right">同比上月 <span style="color: red;">&#x25B2;</span> {{ contentRight }}%</span> -->
         </div>
 
       </div>
@@ -15,7 +15,7 @@
       <div class="stat-item">
         本月处理事件数量（件）
         <div class="content-bar">
-          </br><span class="content">96</span>
+          </br><span class="content">{{dealNum}}</span>
 
           <div ref="barChart" class="barChart"></div>
         </div>
@@ -75,11 +75,11 @@
             </div>
           </div>
         </div>
-          <div class="mid-right-bottom">
-            <span class="pie-chart-title">事件发生时间段统计</span>
-            <div ref="lineChart" class="piechart"></div>
+        <div class="mid-right-bottom">
+          <span class="pie-chart-title">事件发生时间段统计</span>
+          <div ref="lineChart" class="piechart"></div>
 
-          </div>
+        </div>
       </div>
 
     </div>
@@ -89,122 +89,25 @@
 
 <script>
 import * as echarts from 'echarts';
+import { parseTime } from "../utils/ruoyi";
+import { getScanLogsOnThisMonth,dealRate,getCountByType } from "../api/rrqc/scanlog";
 export default {
   name: "Index",
   data() {
     return {
+      count: 0,
+      beepSound: new Audio('../../public/sound.mp3'),
       barChart: null,
+      dealNum: null,
       pieChart: null,
       lineChart: null,
       rateChart: null,
       contentRight: 12,
       // newLogCount: 5,
-      RateChartValue: 90,
+      RateChartValue: 0,
       alerts: [
-        {
-          "createBy": null,
-          "createTime": null,
-          "updateBy": null,
-          "updateTime": null,
-          "remark": "",
-          "logId": 21,
-          "content": "G42K-1098+900处扫码请求救援！！",
-          "zhuangNum": "K-1098+900",
-          "time": "2024-11-30 14:11:03",
-          "type": "0",
-          "address": "G42K-1098+900",
-          "longitude": null,
-          "latitude": null,
-          "weather": "晴",
-          "dealer": null
-        },
-        {
-          "createBy": null,
-          "createTime": null,
-          "updateBy": null,
-          "updateTime": null,
-          "remark": "",
-          "logId": 20,
-          "content": "G42K-1098+700处扫码请求救援！！",
-          "zhuangNum": "K-1098+700",
-          "time": "2024-11-30 14:09:24",
-          "type": "0",
-          "address": "G42K-1098+700",
-          "longitude": null,
-          "latitude": null,
-          "weather": "晴",
-          "dealer": null
-        },
-        {
-          "createBy": null,
-          "createTime": null,
-          "updateBy": null,
-          "updateTime": null,
-          "remark": "已处理",
-          "logId": 19,
-          "content": "G42K-1098+700处扫码请求救援！！",
-          "zhuangNum": "K-1098+700",
-          "time": "2024-11-30 10:55:00",
-          "type": "1",
-          "address": "G42K-1098+700",
-          "longitude": null,
-          "latitude": null,
-          "weather": "晴",
-          "dealer": "系统管理员"
-        },
-        {
-          "createBy": null,
-          "createTime": null,
-          "updateBy": null,
-          "updateTime": null,
-          "remark": "已联合交通管理部门处理了，该次扫码救援",
-          "logId": 18,
-          "content": "G42K-1098+700处扫码请求救援！！",
-          "zhuangNum": "K-1098+700",
-          "time": "2024-11-30 10:53:57",
-          "type": "1",
-          "address": "G42K-1098+700",
-          "longitude": null,
-          "latitude": null,
-          "weather": "晴",
-          "dealer": "用户1"
-        },
-        {
-          "createBy": null,
-          "createTime": null,
-          "updateBy": null,
-          "updateTime": null,
-          "remark": "",
-          "logId": 17,
-          "content": "G42K-1098+123处扫码请求救援！！",
-          "zhuangNum": "K-1098+123",
-          "time": "2024-11-30 10:39:30",
-          "type": "0",
-          "address": "G42K-1098+123",
-          "longitude": null,
-          "latitude": null,
-          "weather": "晴",
-          "dealer": null
-        },
-        {
-          "createBy": null,
-          "createTime": null,
-          "updateBy": null,
-          "updateTime": null,
-          "remark": "",
-          "logId": 16,
-          "content": "K-1098+123处扫码请求救援！！",
-          "zhuangNum": "K-1098+123",
-          "time": "2024-11-30 10:37:55",
-          "type": "0",
-          "address": "K-1098+123",
-          "longitude": null,
-          "latitude": null,
-          "weather": "晴",
-          "dealer": null
-        }
-      ],
 
+      ],
       eventTimeStats: [
         { "time": "20:00-23:59", "count": 12, "percentage": "30%" },
         { "time": "0:00-4:59", "count": 10, "percentage": "25%" },
@@ -212,23 +115,120 @@ export default {
         { "time": "15:00-19:59", "count": 4, "percentage": "10%" },
         { "time": "10:00-14:59", "count": 2, "percentage": "5%" }
       ],
+      socket: null,
+      newLogCount: 0,
       // 版本号
       version: "3.8.8"
     };
   },
+  beforeUnmount() {
+    // 在组件销毁时关闭 WebSocket
+    if (this.socket) {
+      this.socket.close();
+    }
+  },
   mounted() {
+    console.log("欢迎进入系统");
+    // 初始化音频，避免浏览器权限限制
+    document.body.addEventListener('click', () => {
+      this.beepSound.play().then(() => {
+        this.beepSound.pause();
+        this.beepSound.currentTime = 0; // 重置到开始位置
+      }).catch(error => console.log('Audio permission initialized:', error));
+    });
+    this.getScanLogsOnThisMonth();
+    this.dealRate();
+    this.getCountByType();
     this.initBarChart();
     this.initLineChart();
     this.initRateChart();
-    this.initMap();
-    this.initPieChart();
+    // // this.initMap();
+    // this.initPieChart();
+    this.connectWebSocket();
+    // 自动清除悬浮通知
+    setInterval(() => {
+      this.clearNewLogCount();
+      this.clearNewLog();
+      window.location.reload();
+    }, 3600000); // 每 3600秒清空一次
   },
   methods: {
+    getScanLogsOnThisMonth(){
+      getScanLogsOnThisMonth().then(response => {
+        console.log('事件总数',response.data);
+        this.count = response.data;
+      })
+    },
+    dealRate(){
+      dealRate().then(response => {
+        console.log('获取当月事件处理率',response.msg);
+        this.RateChartValue = response.msg;
+      })
+    },
+    getCountByType(){
+      getCountByType('1').then(response => {
+        console.log('获取当月事件处理情况',response.data);
+        this.dealNum = response.data;
+      })
+    },
+      playClickSound() {
+            var audio = document.getElementById('notificationSound');
+            audio.play();
+        },
+    palySoud() {
+      this.beepSound.play();
+    },
+
+    connectWebSocket() {
+      console.log("开始连接 WebSocket");
+      // 创建 WebSocket 连接
+      this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin");
+
+      // WebSocket 连接成功
+      this.socket.onopen = () => {
+        console.log("WebSocket 已连接");
+      };
+
+      // 接收消息
+      this.socket.onmessage = (event) => {
+        const newLog = event.data;
+        // this.alerts.push(JSON.parse(event.data)) ;
+        const log = JSON.parse(newLog);
+        log.time = parseTime(log.time);
+        console.log('新日志添加', log);
+        this.beepSound.play().catch(error => console.error('Error playing audio:', error));
+        this.alerts.unshift(log); // 新日志添加到列表顶部
+        this.newLogCount++; // 增加新日志计数
+      };
+
+      // WebSocket 关闭
+      this.socket.onclose = () => {
+        console.log("WebSocket 已关闭");
+      };
+
+      // WebSocket 错误
+      this.socket.onerror = (error) => {
+        console.error("WebSocket 错误：", error);
+      };
+    },
+    clearNewLogCount() {
+      // 清空新日志计数
+      this.newLogCount = 0;
+    },
+    clearNewLog() {
+      // 清空新日志计数
+      this.alerts = null;
+    },
+    /**
+     * 重置新日志计数（当悬浮组件点击后）。
+     */
+    resetNewLogsCount() {
+      this.newLogsCount = 0;
+    },
     goTarget(href) {
       window.open(href, "_blank");
     },
     initBarChart() {
-
       this.barChart = echarts.init(this.$refs.barChart);
       this.barChart.setOption({
         xAxis: {
@@ -281,9 +281,9 @@ export default {
           }
         },
         grid: {
-          // left: '3%',
-          // right: '4%',
-          // bottom: '3%',
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
           containLabel: true
         },
         xAxis: [
@@ -366,14 +366,14 @@ export default {
         }]
       });
     },
-    initMap() {
-      const mapChart = echarts.init(this.$refs.map);
-      // 地图配置，需要引入地图数据
-    },
+    // initMap() {
+    //   const mapChart = echarts.init(this.$refs.map);
+    //   // 地图配置，需要引入地图数据
+    // },
     initPieChart() {
       this.pieChart = echarts.init(this.$refs.pieChart);
       this.pieChart.setOption({
-         xAxis: {
+        xAxis: {
           show: false,
           type: 'category',
           data: ['1', '2', '3', '4', '5']
@@ -439,7 +439,7 @@ export default {
 <style scoped lang="scss">
 .alerts-container {
   width: 100%;
-  height: 20%;
+  height: 100%;
   border-radius: 5px;
   background-color: white;
   text-align: left;
@@ -534,15 +534,17 @@ export default {
   font-size: 13px;
   color: #918b8b;
 }
-.piechart{
+
+.piechart {
   width: 100%;
-  height: 50%;
+  height: 80%;
   display: flex;
   align-items: center;
   justify-content: right;
   background-color: white;
   position: relative;
 }
+
 .rateChart {
   width: 100%;
   height: 100%;
@@ -701,8 +703,9 @@ export default {
 
 .mid-right-bottom {
   width: 100%;
-  height:400px;
+  height: 400px;
 }
+
 .pie-chart-title {
   display: flex;
   padding: 10px;
@@ -717,6 +720,7 @@ export default {
   border-radius: 5px;
   background-color: #eddfdf;
 }
+
 .chart {
   margin-right: 10px;
   // float: right;
@@ -729,6 +733,7 @@ export default {
   position: absolute;
   z-index: 100;
 }
+
 .home {
   blockquote {
     padding: 10px 20px;

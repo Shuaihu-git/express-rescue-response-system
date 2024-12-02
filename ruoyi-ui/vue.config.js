@@ -91,6 +91,14 @@ module.exports = {
         symbolId: 'icon-[name]'
       })
       .end()
+    //   config.module
+    //  .rule('media')
+    //  .test(/\.(mp3|wav|ogg|mp4|webm)$/)
+    //  .use('file-loader')
+    //  .loader('file-loader')
+    //  .options({
+    //     name: 'media/[name].[ext]'
+    //   }).end()
 
     config.when(process.env.NODE_ENV !== 'development', config => {
           config

@@ -24,3 +24,22 @@ export function updateScanLog(data) {
     data: data
   })
 }
+
+export function getScanLogsOnThisMonth() {
+  return request({
+    url: '/qrlog/count',
+    method: 'get',
+  })
+}
+export function dealRate(){
+  return request({
+    url: '/qrlog/dealRate',
+    method: 'get'
+  })
+}
+export function getCountByType(type){
+  return request({
+    url: '/qrlog/count/'+type,
+    method: 'get',
+  })
+}
