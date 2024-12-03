@@ -23,9 +23,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -176,18 +174,42 @@ public class WebSocketService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+    public static void sendMessageToList(List<String> userIds, String message){
+        for (String userId : userIds) {
+            sendMessage(userId,message);
+        }
+    }
     @Scheduled(fixedRate = 1000 * 10)
     public void pushAdminWebSocket() {
-        log.info("管理端是否在线{}", !(webSocketMap.get("admin") == null));
+        log.info("管理端是否在线{}", mapContainsAdmin());
+        log.info("管理端在线成员{}", getAdmins());
         log.info("是否有消息滞留{}",!messagesSendToAdmin.isEmpty());
-        if (!(webSocketMap.get("admin") == null)&&!messagesSendToAdmin.isEmpty()) {
-            log.info("执行滞留消息重发{}",!(webSocketMap.get("admin") == null)&&!messagesSendToAdmin.isEmpty());
-           messagesSendToAdmin.forEach(e -> sendMessage("admin", e.getData()));
+        if (mapContainsAdmin()&&!messagesSendToAdmin.isEmpty()) {
+            log.info("执行滞留消息重发{}",mapContainsAdmin()&&!messagesSendToAdmin.isEmpty());
+           messagesSendToAdmin.forEach(e -> sendMessageToList(getAdmins(), e.getData()));
            messagesSendToAdmin.clear();
         }else {
             log.info("不处理消息滞留重发问题");
         }
 
+    }
+    public static List<String> getAdmins(){
+        Set<String> strings = webSocketMap.keySet();
+        List<String> list = new ArrayList<>();
+        for (String string : strings) {
+            if (string.contains("admin")){
+                list.add(string);
+            }
+        }
+        return list;
+    }
+    public static boolean mapContainsAdmin(){
+        Set<String> strings = webSocketMap.keySet();
+        for (String string : strings) {
+            return string.contains("admin");
+        }
+        return false;
     }
 
 }
