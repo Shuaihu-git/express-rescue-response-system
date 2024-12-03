@@ -3,6 +3,7 @@
     
   </div> -->
   <div class="dashboard">
+    <audio id="myAudio" src="../assets/audio/sound.mp3"autoplay controls style="display: none;"></audio>
     <div class="top-stats">
       <div class="stat-item">本月发生事件数量（件）
         <div class="content-bar">
@@ -13,9 +14,9 @@
       </div>
 
       <div class="stat-item">
-        本月处理事件数量（件）
+        本周处理事件数量（件）
         <div class="content-bar">
-          </br><span class="content">{{dealNum}}</span>
+          </br><span class="content">{{weekDealNum}}</span>
 
           <div ref="barChart" class="barChart"></div>
         </div>
@@ -90,19 +91,21 @@
 <script>
 import * as echarts from 'echarts';
 import { parseTime } from "../utils/ruoyi";
-import { getScanLogsOnThisMonth,dealRate,getCountByType,getNumByHours } from "../api/rrqc/scanlog";
+import { getScanLogsOnThisMonth,dealRate,getCountByType,getNumByHours,getCountOnTheWeekByType,getNumberOnTheWeek } from "../api/rrqc/scanlog";
 export default {
   name: "Index",
   data() {
     return {
       count: 0,
-      beepSound: new Audio('../../public/sound.mp3'),
+      beepSound: new Audio('../assets/audio/sound.mp3'),
       barChart: null,
+      barChartData: null,
       dealNum: null,
       pieChart: null,
       lineChart: null,
       lineChartData: null,
       rateChart: null,
+      weekDealNum:null,
       contentRight: 12,
       // newLogCount: 5,
       RateChartValue: 0,
@@ -137,21 +140,23 @@ export default {
   },
   mounted() {
     console.log("欢迎进入系统");
-    // 初始化音频，避免浏览器权限限制
-    document.body.addEventListener('click', () => {
+        // 初始化音频，避免浏览器权限限制
+        document.body.addEventListener('click', () => {
       this.beepSound.play().then(() => {
         this.beepSound.pause();
         this.beepSound.currentTime = 0; // 重置到开始位置
       }).catch(error => console.log('Audio permission initialized:', error));
     });
+
     this.getNumByHours();
     this.getScanLogsOnThisMonth();
     this.dealRate();
     this.getCountByType();
+    this.getCountOnTheWeekByType();
+    this.getNumberOnTheWeek();
  
     
-    this.initBarChart();
-    console.log("线性数据：" + this.lineChartData);
+    // this.initBarChart();
     // this.initLineChart();
     // this.initRateChart();
     // // this.initMap();
@@ -167,7 +172,6 @@ export default {
   methods: {
     getScanLogsOnThisMonth(){
       getScanLogsOnThisMonth().then(response => {
-        console.log('事件总数',response.data);
         this.count = response.data;
       })
     },
@@ -180,23 +184,33 @@ export default {
     },
     getCountByType(){
       getCountByType('1').then(response => {
-        console.log('获取当月事件处理情况',response.data);
+
         this.dealNum = response.data;
       })
     },
     getNumByHours(){
       getNumByHours().then(response => {
-        console.log('获取当天事件发生时间段统计',response.data);
+
         this.lineChartData = response.data;
         this.initLineChart();
       })
     },
-      playClickSound() {
-            var audio = document.getElementById('notificationSound');
-            audio.play();
-        },
-    palySoud() {
-      this.beepSound.play();
+    getCountOnTheWeekByType(){
+      getCountOnTheWeekByType('1').then(response => {
+        this.weekDealNum = response.data;
+      })
+    },
+    getNumberOnTheWeek(){
+      getNumberOnTheWeek().then(response => {
+        this.barChartData = response.data;
+        this.initBarChart();
+      })
+    },
+    playAudio() {
+      const audio = document.getElementById('myAudio');
+      if (audio) {
+        audio.play();
+      }
     },
 
     connectWebSocket() {
@@ -216,7 +230,7 @@ export default {
         const log = JSON.parse(newLog);
         log.time = parseTime(log.time);
         console.log('新日志添加', log);
-        this.beepSound.play().catch(error => console.error('Error playing audio:', error));
+        this.playAudio();
         this.alerts.unshift(log); // 新日志添加到列表顶部
         this.newLogCount++; // 增加新日志计数
       };
@@ -254,7 +268,7 @@ export default {
         xAxis: {
           show: false,
           type: 'category',
-          data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
+          data: [1,2,3,4,5,6,7]
         },
         yAxis: {
           show: false,
@@ -262,11 +276,7 @@ export default {
         },
         series: [
           {
-            data: [140, 232, 101, 264, 90, 340, 250, 200, 167, 157,
-              16, 36, 240, 213, 222, 32, 87, 78, 89, 65,
-              215, 25, 163, 98, 78, 68, 135, 12, 75, 324,
-              321
-            ],
+            data: this.barChartData,
             type: 'bar'
           }
         ]
