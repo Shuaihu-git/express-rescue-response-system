@@ -231,7 +231,8 @@ document.body.addEventListener('mousemove', this.initializeAudio);
     connectWebSocket() {
       console.log("开始连接 WebSocket");
       // 创建 WebSocket 连接
-      this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin" + Date.now());
+      // this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin" + Date.now());
+      this.socket = new WebSocket("ws://192.168.131.128:9000/websocket/admin" + Date.now());
 
       // WebSocket 连接成功
       this.socket.onopen = () => {
