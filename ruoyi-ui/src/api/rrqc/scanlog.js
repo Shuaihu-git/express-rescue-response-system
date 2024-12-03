@@ -49,3 +49,15 @@ export function getNumByHours(){
     method: 'get',
   })
 }
+export function getCountOnTheWeekByType(type){
+  return request({
+    url: '/qrlog/week/count/'+type,
+    method: 'get',
+  })
+}
+export function getNumberOnTheWeek(){
+  return request({
+    url: '/qrlog/week/list',
+    method: 'get',
+  })
+}
