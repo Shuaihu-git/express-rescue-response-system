@@ -43,3 +43,9 @@ export function getCountByType(type){
     method: 'get',
   })
 }
+export function getNumByHours(){
+  return request({
+    url: '/qrlog/hours',
+    method: 'get',
+  })
+}

@@ -90,7 +90,7 @@
 <script>
 import * as echarts from 'echarts';
 import { parseTime } from "../utils/ruoyi";
-import { getScanLogsOnThisMonth,dealRate,getCountByType } from "../api/rrqc/scanlog";
+import { getScanLogsOnThisMonth,dealRate,getCountByType,getNumByHours } from "../api/rrqc/scanlog";
 export default {
   name: "Index",
   data() {
@@ -101,6 +101,7 @@ export default {
       dealNum: null,
       pieChart: null,
       lineChart: null,
+      lineChartData: null,
       rateChart: null,
       contentRight: 12,
       // newLogCount: 5,
@@ -127,6 +128,13 @@ export default {
       this.socket.close();
     }
   },
+  beforeMount() {
+    // 在这里执行你想要在mounted之前进行的操作
+    console.log('在组件即将挂载到DOM之前执行此操作');
+    this.getNumByHours();
+    console.log("线性数据：" + this.lineChartData);
+
+  },
   mounted() {
     console.log("欢迎进入系统");
     // 初始化音频，避免浏览器权限限制
@@ -136,12 +144,16 @@ export default {
         this.beepSound.currentTime = 0; // 重置到开始位置
       }).catch(error => console.log('Audio permission initialized:', error));
     });
+    this.getNumByHours();
     this.getScanLogsOnThisMonth();
     this.dealRate();
     this.getCountByType();
+ 
+    
     this.initBarChart();
-    this.initLineChart();
-    this.initRateChart();
+    console.log("线性数据：" + this.lineChartData);
+    // this.initLineChart();
+    // this.initRateChart();
     // // this.initMap();
     // this.initPieChart();
     this.connectWebSocket();
@@ -163,12 +175,20 @@ export default {
       dealRate().then(response => {
         console.log('获取当月事件处理率',response.msg);
         this.RateChartValue = response.msg;
+        this.initRateChart();
       })
     },
     getCountByType(){
       getCountByType('1').then(response => {
         console.log('获取当月事件处理情况',response.data);
         this.dealNum = response.data;
+      })
+    },
+    getNumByHours(){
+      getNumByHours().then(response => {
+        console.log('获取当天事件发生时间段统计',response.data);
+        this.lineChartData = response.data;
+        this.initLineChart();
       })
     },
       playClickSound() {
@@ -182,7 +202,7 @@ export default {
     connectWebSocket() {
       console.log("开始连接 WebSocket");
       // 创建 WebSocket 连接
-      this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin");
+      this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin"+Date.now());
 
       // WebSocket 连接成功
       this.socket.onopen = () => {
@@ -327,10 +347,7 @@ export default {
             emphasis: {
               focus: 'series'
             },
-            data: [40, 32, 10, 64, 90, 40, 50, 56, 67, 57,
-              16, 36, 240, 213, 222, 32, 87, 78, 89, 65,
-              215, 25, 163, 98
-            ]
+            data: this.lineChartData
           }
         ]
       });
