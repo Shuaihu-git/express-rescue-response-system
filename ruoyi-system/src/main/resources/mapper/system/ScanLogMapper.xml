@@ -89,6 +89,22 @@
         FROM scanlog
         WHERE DATE_FORMAT(time, '%Y-%m') = DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m') and type=#{type};
     </select>
+    <select id="getNumberByHours" resultType="java.lang.Integer">
+        -- 创建一个临时表，包含24小时的时间区间
+        WITH hours AS (
+            SELECT DATE_FORMAT(DATE_SUB(CURRENT_TIMESTAMP, INTERVAL h HOUR), '%Y-%m-%d %H:00:00') AS hour_interval
+            FROM (
+                     SELECT 0 AS h UNION ALL SELECT 1 AS h UNION ALL SELECT 2 AS h UNION ALL SELECT 3 AS h UNION ALL SELECT 4 AS h UNION ALL SELECT 5 AS h UNION ALL SELECT 6 AS h UNION ALL SELECT 7 AS h UNION ALL SELECT 8 AS h UNION ALL SELECT 9 AS h UNION ALL SELECT 10 AS h UNION ALL SELECT 11 AS h UNION ALL SELECT 12 AS h UNION ALL SELECT 13 AS h UNION ALL SELECT 14 AS h UNION ALL SELECT 15 AS h UNION ALL SELECT 16 AS h UNION ALL SELECT 17 AS h UNION ALL SELECT 18 AS h UNION ALL SELECT 19 AS h UNION ALL Select 20 AS h UNION ALL Select 21 AS h UNION ALL Select 22 AS h UNION ALL Select 23 AS h
+                 ) AS hours_table
+        )
+
+-- 从原始表和临时表进行联合查询，统计每小时的计数并按照0-23点顺序排列输出 hours.hour_interval,
+        SELECT  COUNT(scanlog.time) AS count_per_hour
+        FROM hours
+                 LEFT JOIN scanlog ON hours.hour_interval = DATE_FORMAT(scanlog.time, '%Y-%m-%d %H:00:00')
+        GROUP BY hours.hour_interval
+        ORDER BY HOUR(hours.hour_interval);
+    </select>
 
 
 </mapper>

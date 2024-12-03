@@ -13,4 +13,5 @@ public interface IScanLogService {
     ScanLog selectScanLogById(Long id);
     int getCountOnTheMonth();
     int getCountOnTheMonthByType(String type);
+    List<Integer> getNumberByHours();
 }

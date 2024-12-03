@@ -89,6 +89,11 @@ public class ScanLogController extends BaseController {
         }
         return success(scanLogService.getCountOnTheMonthByType(type));
     }
-
+    @Log(title = "事件发生时间段统计")
+    @GetMapping("/qrlog/hours")
+    public AjaxResult getNumberByHours(){
+        List<Integer> numberByHours = scanLogService.getNumberByHours();
+        return success(numberByHours);
+    }
 
 }

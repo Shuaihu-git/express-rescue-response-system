@@ -48,4 +48,9 @@ public class ScanLogServiceImpl implements IScanLogService {
     public int getCountOnTheMonthByType(String type) {
         return scanLogMapper.getCountOnTheMonthByType(type);
     }
+
+    @Override
+    public List<Integer> getNumberByHours() {
+        return scanLogMapper.getNumberByHours();
+    }
 }
