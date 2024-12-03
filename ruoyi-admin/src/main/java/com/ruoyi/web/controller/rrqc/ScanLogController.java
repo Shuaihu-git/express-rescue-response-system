@@ -95,5 +95,20 @@ public class ScanLogController extends BaseController {
         List<Integer> numberByHours = scanLogService.getNumberByHours();
         return success(numberByHours);
     }
+    @Log(title = "获取当周事件通过处理类型")
+    @GetMapping("/qrlog/week/count/{type}")
+    public AjaxResult getWeekCountByType(@PathVariable("type") String type)
+    {
+        if (type == null || type.isEmpty()){
+            return error("请填写参数");
+        }
+        return success(scanLogService.getCountOnTheWeekByType(type));
+    }
+    @Log(title = "获取当周发生事件总数")
+    @GetMapping("/qrlog/week/list")
+    public AjaxResult getWeekStaticList()
+    {
+        return success(scanLogService.getNumberOnTheWeek());
+    }
 
 }

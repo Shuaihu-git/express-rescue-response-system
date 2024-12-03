@@ -19,4 +19,10 @@ public interface ScanLogMapper extends BaseMapper<ScanLog> {
     int getCountOnTheMonth();
     int getCountOnTheMonthByType(@Param("type")String type);
     List<Integer> getNumberByHours();
+
+    int getCountOnTheWeek();
+
+    int getCountOnTheByType(String type);
+
+    List<Integer> getNumberOnTheWeek();
 }

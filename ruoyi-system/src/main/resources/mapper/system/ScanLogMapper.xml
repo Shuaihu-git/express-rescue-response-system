@@ -105,6 +105,35 @@
         GROUP BY hours.hour_interval
         ORDER BY HOUR(hours.hour_interval);
     </select>
+    <select id="getCountOnTheWeek" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS record_count
+        FROM scanlog
+        WHERE time >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 WEEK)
+    </select>
+    <select id="getCountOnTheByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) AS record_count
+        FROM scanlog
+        WHERE time >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 WEEK) and type=#{type};
+    </select>
+    <select id="getNumberOnTheWeek" resultType="java.lang.Integer">
+        -- 创建一个临时表，包含最近一周的日期范围
+        WITH days AS (
+            SELECT DATE_FORMAT(DATE_SUB(CURRENT_DATE, INTERVAL d DAY), '%Y-%m-%d') AS day_interval
+            FROM (
+                     SELECT 0 AS d UNION ALL SELECT 1 AS d UNION ALL SELECT 2 AS d UNION ALL SELECT 3 AS d UNION ALL SELECT 4 AS d UNION ALL SELECT 5 AS d UNION ALL SELECT 6 AS d
+                 ) AS days_table
+        )
+
+-- 从原始表和临时表进行联合查询，统计每天的计数并区分处理状态 days.day_interval,
+        SELECT
+               SUM(CASE WHEN scanlog.type = '1' THEN 1 ELSE 0 END) AS processed_count
+--                SUM(CASE WHEN scanlog.type = '0' THEN 1 ELSE 0 END) AS unprocessed_count
+        FROM days
+                 LEFT JOIN scanlog ON days.day_interval = DATE_FORMAT(scanlog.time, '%Y-%m-%d')
+            AND scanlog.time >= DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)
+        GROUP BY days.day_interval
+        ORDER BY days.day_interval;
+    </select>
 
 
 </mapper>

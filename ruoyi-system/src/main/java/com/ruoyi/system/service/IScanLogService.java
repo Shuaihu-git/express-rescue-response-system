@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 
 import com.ruoyi.system.domain.dto.ScanLog;
+import com.ruoyi.system.domain.vo.WeekStatic;
 
 import java.util.List;
 
@@ -14,4 +15,10 @@ public interface IScanLogService {
     int getCountOnTheMonth();
     int getCountOnTheMonthByType(String type);
     List<Integer> getNumberByHours();
+
+//    WeekStatic getWeekStatic();
+    int getCountOnTheWeek();
+    int getCountOnTheWeekByType(String type);
+    List<Integer> getNumberOnTheWeek();
+
 }

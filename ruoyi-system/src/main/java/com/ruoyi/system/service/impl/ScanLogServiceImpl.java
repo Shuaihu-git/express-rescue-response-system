@@ -53,4 +53,19 @@ public class ScanLogServiceImpl implements IScanLogService {
     public List<Integer> getNumberByHours() {
         return scanLogMapper.getNumberByHours();
     }
+
+    @Override
+    public int getCountOnTheWeek() {
+        return scanLogMapper.getCountOnTheWeek();
+    }
+
+    @Override
+    public int getCountOnTheWeekByType(String type) {
+        return scanLogMapper.getCountOnTheByType(type);
+    }
+
+    @Override
+    public List<Integer> getNumberOnTheWeek() {
+        return scanLogMapper.getNumberOnTheWeek();
+    }
 }
