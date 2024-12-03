@@ -3,11 +3,11 @@
     
   </div> -->
   <div class="dashboard">
-    <audio id="myAudio" src="../assets/audio/sound.mp3"autoplay controls style="display: none;"></audio>
+    <audio id="myAudio" preload="auto" src="../assets/audio/sound.mp3" controls style="display: none;"></audio>
     <div class="top-stats">
       <div class="stat-item">本月发生事件数量（件）
         <div class="content-bar">
-          </br><span class="content">{{count}}</span>
+          </br><span class="content">{{ count }}</span>
           <!-- <span class="content-right">同比上月 <span style="color: red;">&#x25B2;</span> {{ contentRight }}%</span> -->
         </div>
 
@@ -16,7 +16,7 @@
       <div class="stat-item">
         本周处理事件数量（件）
         <div class="content-bar">
-          </br><span class="content">{{weekDealNum}}</span>
+          </br><span class="content">{{ weekDealNum }}</span>
 
           <div ref="barChart" class="barChart"></div>
         </div>
@@ -90,8 +90,9 @@
 
 <script>
 import * as echarts from 'echarts';
+import { Notification } from 'element-ui';
 import { parseTime } from "../utils/ruoyi";
-import { getScanLogsOnThisMonth,dealRate,getCountByType,getNumByHours,getCountOnTheWeekByType,getNumberOnTheWeek } from "../api/rrqc/scanlog";
+import { getScanLogsOnThisMonth, dealRate, getCountByType, getNumByHours, getCountOnTheWeekByType, getNumberOnTheWeek } from "../api/rrqc/scanlog";
 export default {
   name: "Index",
   data() {
@@ -105,7 +106,7 @@ export default {
       lineChart: null,
       lineChartData: null,
       rateChart: null,
-      weekDealNum:null,
+      weekDealNum: null,
       contentRight: 12,
       // newLogCount: 5,
       RateChartValue: 0,
@@ -135,18 +136,26 @@ export default {
     // 在这里执行你想要在mounted之前进行的操作
     console.log('在组件即将挂载到DOM之前执行此操作');
     this.getNumByHours();
-    console.log("线性数据：" + this.lineChartData);
+    // 添加点击事件监听器来初始化音频
+document.body.addEventListener('click', this.initializeAudio);
+
+// 添加页面滚动事件监听器来初始化音频
+document.body.addEventListener('scroll', this.initializeAudio);
+
+// 添加鼠标移动事件监听器来初始化音频
+document.body.addEventListener('mousemove', this.initializeAudio);
 
   },
   mounted() {
     console.log("欢迎进入系统");
-        // 初始化音频，避免浏览器权限限制
-        document.body.addEventListener('click', () => {
-      this.beepSound.play().then(() => {
-        this.beepSound.pause();
-        this.beepSound.currentTime = 0; // 重置到开始位置
-      }).catch(error => console.log('Audio permission initialized:', error));
-    });
+    // 初始化音频，避免浏览器权限限制
+    // document.body.addEventListener('click', () => {
+    //   this.beepSound.play().then(() => {
+    //     this.beepSound.pause();
+    //     this.beepSound.currentTime = 0; // 重置到开始位置
+    //   }).catch(error => console.log('Audio permission initialized:', error));
+    // });
+
 
     this.getNumByHours();
     this.getScanLogsOnThisMonth();
@@ -154,8 +163,8 @@ export default {
     this.getCountByType();
     this.getCountOnTheWeekByType();
     this.getNumberOnTheWeek();
- 
-    
+
+
     // this.initBarChart();
     // this.initLineChart();
     // this.initRateChart();
@@ -170,37 +179,43 @@ export default {
     }, 3600000); // 每 3600秒清空一次
   },
   methods: {
-    getScanLogsOnThisMonth(){
+    initializeAudio() {
+    this.beepSound.play().then(() => {
+        this.beepSound.pause();
+        this.beepSound.currentTime = 0; // 重置到开始位置
+    }).catch(error => console.log('Audio permission initialized:', error));
+},
+    getScanLogsOnThisMonth() {
       getScanLogsOnThisMonth().then(response => {
         this.count = response.data;
       })
     },
-    dealRate(){
+    dealRate() {
       dealRate().then(response => {
-        console.log('获取当月事件处理率',response.msg);
+        console.log('获取当月事件处理率', response.msg);
         this.RateChartValue = response.msg;
         this.initRateChart();
       })
     },
-    getCountByType(){
+    getCountByType() {
       getCountByType('1').then(response => {
 
         this.dealNum = response.data;
       })
     },
-    getNumByHours(){
+    getNumByHours() {
       getNumByHours().then(response => {
 
         this.lineChartData = response.data;
         this.initLineChart();
       })
     },
-    getCountOnTheWeekByType(){
+    getCountOnTheWeekByType() {
       getCountOnTheWeekByType('1').then(response => {
         this.weekDealNum = response.data;
       })
     },
-    getNumberOnTheWeek(){
+    getNumberOnTheWeek() {
       getNumberOnTheWeek().then(response => {
         this.barChartData = response.data;
         this.initBarChart();
@@ -216,7 +231,7 @@ export default {
     connectWebSocket() {
       console.log("开始连接 WebSocket");
       // 创建 WebSocket 连接
-      this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin"+Date.now());
+      this.socket = new WebSocket("ws://192.168.10.136:9000/websocket/admin" + Date.now());
 
       // WebSocket 连接成功
       this.socket.onopen = () => {
@@ -233,6 +248,8 @@ export default {
         this.playAudio();
         this.alerts.unshift(log); // 新日志添加到列表顶部
         this.newLogCount++; // 增加新日志计数
+        // 接收到消息时弹出消息弹窗
+        Notification.success({ title: "您收到一条新的实时告警消息" })
       };
 
       // WebSocket 关闭
@@ -268,7 +285,7 @@ export default {
         xAxis: {
           show: false,
           type: 'category',
-          data: [1,2,3,4,5,6,7]
+          data: [1, 2, 3, 4, 5, 6, 7]
         },
         yAxis: {
           show: false,
