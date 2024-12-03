@@ -22,7 +22,7 @@ public class ScanLog extends BaseEntity {
      *日志id
      */
     @TableId(value = "id",type = IdType.AUTO)
-    @Excel(name = "序号", cellType = Excel.ColumnType.NUMERIC)
+//    @Excel(name = "扫码日志编号", cellType = Excel.ColumnType.NUMERIC)
     private Long logId;
     @Excel(name = "内容")
     private String content;

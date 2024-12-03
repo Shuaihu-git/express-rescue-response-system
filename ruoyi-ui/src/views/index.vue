@@ -14,7 +14,7 @@
       </div>
 
       <div class="stat-item">
-        本周处理事件数量（件）
+        最近一周处理事件数量（件）
         <div class="content-bar">
           </br><span class="content">{{ weekDealNum }}</span>
 
@@ -288,7 +288,7 @@ document.body.addEventListener('mousemove', this.initializeAudio);
           data: [1, 2, 3, 4, 5, 6, 7]
         },
         yAxis: {
-          show: false,
+          show: true,
           type: 'value'
         },
         series: [
