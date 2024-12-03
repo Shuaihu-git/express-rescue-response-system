@@ -206,10 +206,15 @@ public class WebSocketService {
     }
     public static boolean mapContainsAdmin(){
         Set<String> strings = webSocketMap.keySet();
-        for (String string : strings) {
-            return string.contains("admin");
-        }
-        return false;
+        //查询Map Key之中是否包含admin开头的字符串有返回true否则返回flase
+
+//        for (String string : strings) {
+//            return string.contains("admin");
+//        }
+//        return false;
+        boolean containsAdmin = strings.stream()
+                .anyMatch(s -> s.startsWith("admin"));
+        return containsAdmin;
     }
 
 }
