@@ -5,7 +5,7 @@
       <h3 class="title">高速公路快速救援响应系统</h3>
       <img src="../assets/images/login_left.png" class="login-left-image">
       <div class="login-form-box">
-        
+
         <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
           <h3 class="user-login">用户登录</h3>
           <el-form-item prop="username">
@@ -65,8 +65,8 @@ export default {
     return {
       codeUrl: "",
       loginForm: {
-        username: "admin",
-        password: "admin123",
+        username: "",
+        password: "",
         rememberMe: false,
         code: "",
         uuid: ""
@@ -218,7 +218,7 @@ export default {
   .el-input {
     height: 38px;
     width: 300px;
-    
+
     input {
       height: 38px;
     }
